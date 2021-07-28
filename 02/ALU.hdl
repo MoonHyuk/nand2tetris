@@ -44,19 +44,25 @@ CHIP ALU {
     PARTS:
     Not16(in=x, out=notx);
     Not16(in=y, out=noty);
+
+    // nx와 zx에 따라 x, notx, 0, -1 중에서 선택합니다.
     Mux4Way16(a=x, b=notx, c=false, d=true, sel[0]=nx, sel[1]=zx, out=newx);
+    // ny와 zy에 따라 y, noty, 0, -1 중에서 선택합니다.
     Mux4Way16(a=y, b=noty, c=false, d=true, sel[0]=ny, sel[1]=zy, out=newy);
     
     Add16(a=newx, b=newy, out=addxy);
     And16(a=newx, b=newy, out=andxy);
+
+    // f값에 따라 x + y와 x & y 중에서 선택합니다.
     Mux16(a=andxy, b=addxy, sel=f, out=temp);
-    Not16(in=temp, out=notout);
-    Mux16(a=temp, b=notout, sel=no, out=out, out[15]=msb, out[0..7]=outleft, out[8..15]=outright);
 
-    Mux(a=false, b=true, sel=msb, out=ng);
+    Not16(in=temp, out=nottemp);
+    // no값에 따라 temp와 nottemp 중에서 선택합니다.
+    // out의 msb가 1이면 음수이고 0이면 양수이므로 msb를 그대로 ng에 넣습니다.
+    Mux16(a=temp, b=nottemp, sel=no, out=out, out[15]=ng, out[0..7]=outleft, out[8..15]=outright);
 
-    Or8Way(in=outleft, out=iszero1);
-    Or8Way(in=outright, out=iszero2);
-    Or(a=iszero1, b=iszero2, out=iszero);
-    Mux(a=true, b=false, sel=iszero, out=zr);
+    Or8Way(in=outleft, out=hasone1);
+    Or8Way(in=outright, out=hasone2);
+    Or(a=hasone1, b=hasone2, out=hasone);
+    Not(in=hasone, out=zr);
 }

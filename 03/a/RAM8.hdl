@@ -15,5 +15,28 @@ CHIP RAM8 {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // addr1 ~ addr8 중 address가 가르키는 곳은 true가 된다.
+    DMux8Way(in=true, sel=address, a=addr1, b=addr2, c=addr3, d=addr4, e=addr5, f=addr6, g=addr7, h=addr8);
+
+    // addr1 ~ addr8 별로 load를 다시 구한다. addrX가 0이면 loadX는 0이고, addrX에 위차한 레지스터에는 아무 변화를 주지 않는다.
+    And(a=load, b=addr1, out=load1);
+    And(a=load, b=addr2, out=load2);
+    And(a=load, b=addr3, out=load3);
+    And(a=load, b=addr4, out=load4);
+    And(a=load, b=addr5, out=load5);
+    And(a=load, b=addr6, out=load6);
+    And(a=load, b=addr7, out=load7);
+    And(a=load, b=addr8, out=load8);
+
+    Register(in=in, load=load1, out=out1);
+    Register(in=in, load=load2, out=out2);
+    Register(in=in, load=load3, out=out3);
+    Register(in=in, load=load4, out=out4);
+    Register(in=in, load=load5, out=out5);
+    Register(in=in, load=load6, out=out6);
+    Register(in=in, load=load7, out=out7);
+    Register(in=in, load=load8, out=out8);
+
+    // out1 ~ out8 중 address에 해당하는 값을 택해 출력한다.
+    Mux8Way16(a=out1, b=out2, c=out3, d=out4, e=out5, f=out6, g=out7, h=out8, sel=address, out=out);
 }
